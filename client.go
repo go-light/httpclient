@@ -4,18 +4,20 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/go-light/logentry"
-	xhttpclient "github.com/gojektech/heimdall/v6/httpclient"
-	"github.com/pkg/errors"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"sync"
 	"time"
 	"unsafe"
+
+	"github.com/go-light/logentry"
+	xhttpclient "github.com/gojektech/heimdall/v6/httpclient"
+	"github.com/pkg/errors"
 )
 
 var httpClientMap sync.Map
+var mu sync.Mutex
 
 type HttpClient interface {
 	Get(ctx context.Context, url string, headers http.Header, res interface{}) (ret *Resp)
@@ -36,6 +38,13 @@ type Resp struct {
 }
 
 func NewClient(name string, options ...Option) (HttpClient, error) {
+	if val, ok := httpClientMap.Load(name); ok {
+		return val.(*Client), nil
+	}
+
+	mu.Lock()
+	defer mu.Unlock()
+
 	if val, ok := httpClientMap.Load(name); ok {
 		return val.(*Client), nil
 	}

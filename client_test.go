@@ -7,6 +7,27 @@ import (
 	"testing"
 )
 
+func TestNewClient(t *testing.T) {
+	for i := 0; i < 100000; i++ {
+		c, err := NewClient("demo", WithRetryCount(1), WithTimeout("2s"))
+		if err != nil {
+			t.Error(err)
+			return
+		}
+
+		fmt.Println(c)
+
+		go func() {
+			c, err := NewClient("demo", WithRetryCount(1), WithTimeout("2s"))
+			if err != nil {
+				t.Error(err)
+				return
+			}
+			fmt.Println(c)
+		}()
+	}
+}
+
 func TestClient_Get(t *testing.T) {
 
 	c, err := NewClient("a", WithRetryCount(1), WithTimeout("2s"))
