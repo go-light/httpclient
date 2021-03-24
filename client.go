@@ -6,18 +6,38 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"sync"
 	"time"
-	"unsafe"
 
+	"github.com/go-light/httpclient/heimdall"
+
+	xhttpclient "github.com/go-light/httpclient/heimdall/httpclient"
 	"github.com/go-light/logentry"
-	xhttpclient "github.com/gojektech/heimdall/v6/httpclient"
 	"github.com/pkg/errors"
 )
 
-var httpClientMap sync.Map
-var mu sync.Mutex
+const (
+	defaultRetryCount  = 1
+	defaultHTTPTimeout = 1 * time.Second
+
+	defaultMaxIdleConns        = 20000
+	defaultMaxIdleConnsPerHost = 1000
+)
+
+var (
+	httpClientMap sync.Map
+	mu            sync.Mutex
+)
+
+type myHTTPClient struct {
+	client http.Client
+}
+
+func (c *myHTTPClient) Do(request *http.Request) (*http.Response, error) {
+	return c.client.Do(request)
+}
 
 type HttpClient interface {
 	Get(ctx context.Context, url string, headers http.Header, res interface{}) (ret *Resp)
@@ -26,7 +46,7 @@ type HttpClient interface {
 
 type Client struct {
 	xhttpclient *xhttpclient.Client
-	timeout     string
+	timeout     time.Duration
 	retryCount  int
 
 	maxIdleConns        int
@@ -40,41 +60,65 @@ type Resp struct {
 	LogEntry   logentry.HttpClientLogEntry
 }
 
-func NewClient(name string, options ...Option) (HttpClient, error) {
+func NewClient(name string, options ...Option) HttpClient {
 	if val, ok := httpClientMap.Load(name); ok {
-		return val.(*Client), nil
+		return val.(*Client)
 	}
 
 	mu.Lock()
 	defer mu.Unlock()
 
 	if val, ok := httpClientMap.Load(name); ok {
-		return val.(*Client), nil
+		return val.(*Client)
 	}
 
 	client := &Client{
-		timeout:    "1s",
-		retryCount: 1,
+		timeout:    defaultHTTPTimeout,
+		retryCount: defaultRetryCount,
 	}
 	for _, o := range options {
 		o.Apply(client)
 	}
 
-	// Create a new HTTP client with a default timeout
-	timeout, err := time.ParseDuration(client.timeout)
-	if err != nil {
-		return nil, err
+	if client.maxIdleConns == 0 {
+		client.maxIdleConns = defaultMaxIdleConns
+	}
+
+	if client.maxIdleConnsPerHost == 0 {
+		client.maxIdleConnsPerHost = defaultMaxIdleConnsPerHost
+	}
+
+	var rt http.RoundTripper = &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		DialContext: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+			DualStack: true,
+		}).DialContext,
+		MaxIdleConns:        client.maxIdleConns,
+		MaxIdleConnsPerHost: client.maxIdleConnsPerHost, // see https://github.com/golang/go/issues/13801
+		// 5 minutes is typically above the maximum sane scrape interval. So we can
+		// use keepalive for all configurations.
+		IdleConnTimeout:       5 * time.Minute,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
 	}
 
 	client.xhttpclient = xhttpclient.NewClient(
-		xhttpclient.WithHTTPTimeout(timeout),
+		xhttpclient.WithHTTPTimeout(client.timeout),
+		xhttpclient.WithHTTPClient(&myHTTPClient{
+			// replace with custom HTTP client
+			client: http.Client{
+				Transport: rt,
+				Timeout:   client.timeout,
+			},
+		}),
 		xhttpclient.WithRetryCount(client.retryCount),
-		xhttpclient.WithMaxIdleConns(client.maxIdleConns),
-		xhttpclient.WithMaxIdleConnsPerHost(client.maxIdleConnsPerHost),
+		xhttpclient.WithRetrier(heimdall.NewRetrier(heimdall.NewConstantBackoff(1*time.Millisecond, 5*time.Millisecond))),
 	)
 	httpClientMap.Store(name, client)
 
-	return client, nil
+	return client
 }
 
 func (c *Client) Get(ctx context.Context, url string, headers http.Header, res interface{}) (ret *Resp) {
@@ -146,7 +190,7 @@ func (c *Client) do(ctx context.Context, url string, method string, headers http
 		return
 	}
 
-	respSizeBytes = fmt.Sprintf("%d", unsafe.Sizeof(respBody))
+	respSizeBytes = fmt.Sprintf("%d", len(respBody))
 
 	if res != nil {
 		err := json.Unmarshal(respBody, &res)

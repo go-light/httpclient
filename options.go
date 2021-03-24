@@ -1,5 +1,7 @@
 package httpclient
 
+import "time"
+
 // Option represents the client options
 type Option interface {
 	Apply(*Client)
@@ -13,7 +15,7 @@ func (f OptionFunc) Apply(client *Client) {
 	f(client)
 }
 
-func WithTimeout(timeout string) Option {
+func WithTimeout(timeout time.Duration) Option {
 	return OptionFunc(func(m *Client) {
 		m.timeout = timeout
 	})
