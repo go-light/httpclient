@@ -2,14 +2,14 @@ package httpclient
 
 import (
 	"bytes"
+	"io"
+	"io/ioutil"
+	"net/http"
+	"time"
+
 	"github.com/go-light/httpclient/heimdall"
 	"github.com/gojektech/valkyrie"
 	"github.com/pkg/errors"
-	"io"
-	"io/ioutil"
-	"net"
-	"net/http"
-	"time"
 )
 
 // Client is the http client implementation
@@ -20,17 +20,11 @@ type Client struct {
 	retryCount int
 	retrier    heimdall.Retriable
 	plugins    []heimdall.Plugin
-
-	maxIdleConns        int
-	maxIdleConnsPerHost int
 }
 
 const (
 	defaultRetryCount  = 0
 	defaultHTTPTimeout = 30 * time.Second
-
-	defaultMaxIdleConns        = 20000
-	defaultMaxIdleConnsPerHost = 1000
 )
 
 var _ heimdall.Client = (*Client)(nil)
@@ -47,34 +41,9 @@ func NewClient(opts ...Option) *Client {
 		opt(&client)
 	}
 
-	if client.maxIdleConns == 0 {
-		client.maxIdleConns = defaultMaxIdleConns
-	}
-
-	if client.maxIdleConnsPerHost == 0 {
-		client.maxIdleConnsPerHost = defaultMaxIdleConnsPerHost
-	}
-
-	var rt http.RoundTripper = &http.Transport{
-		Proxy: http.ProxyFromEnvironment,
-		DialContext: (&net.Dialer{
-			Timeout:   30 * time.Second,
-			KeepAlive: 30 * time.Second,
-			DualStack: true,
-		}).DialContext,
-		MaxIdleConns:        client.maxIdleConns,
-		MaxIdleConnsPerHost: client.maxIdleConnsPerHost, // see https://github.com/golang/go/issues/13801
-		// 5 minutes is typically above the maximum sane scrape interval. So we can
-		// use keepalive for all configurations.
-		IdleConnTimeout:       5 * time.Minute,
-		TLSHandshakeTimeout:   10 * time.Second,
-		ExpectContinueTimeout: 1 * time.Second,
-	}
-
 	if client.client == nil {
 		client.client = &http.Client{
-			Transport: rt,
-			Timeout:   client.timeout,
+			Timeout: client.timeout,
 		}
 	}
 

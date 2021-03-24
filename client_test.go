@@ -4,50 +4,31 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewClient(t *testing.T) {
 	for i := 0; i < 100000; i++ {
-		c, err := NewClient("demo", WithRetryCount(1), WithTimeout("2s"),
+		c := NewClient("demo", WithRetryCount(1), WithTimeout(2*time.Second),
 			WithMaxIdleConns(0), WithMaxIdleConnsPerHost(0))
-		if err != nil {
-			t.Error(err)
-			return
-		}
 
 		fmt.Println(c)
 
 		go func() {
-			c, err := NewClient("demo", WithRetryCount(1), WithTimeout("2s"))
-			if err != nil {
-				t.Error(err)
-				return
-			}
+			c := NewClient("demo", WithRetryCount(1), WithTimeout(2*time.Second))
 			fmt.Println(c)
 		}()
 	}
 }
 
 func TestClient_Get(t *testing.T) {
-	c, err := NewClient("test.get",
-		WithRetryCount(1),
-		WithTimeout("2s"),
-		WithMaxIdleConns(20000),
-		WithMaxIdleConnsPerHost(100),
-	)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	fmt.Printf("%+v\n", c)
-
 	dummyHandler := func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, http.MethodGet, r.Method)
 		assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
@@ -75,8 +56,13 @@ func TestClient_Get(t *testing.T) {
 	}
 
 	reply := Reply{}
-	ret := c.Get(context.Background(), server.URL, headers, &reply)
-	require.NoError(t, err, "should not have failed to make a GET request")
+	ret := NewClient("test.get",
+		WithRetryCount(1),
+		WithTimeout(2*time.Second),
+		WithMaxIdleConns(20000),
+		WithMaxIdleConnsPerHost(100),
+	).Get(context.Background(), server.URL, headers, &reply)
+	require.NoError(t, ret.Error, "should not have failed to make a GET request")
 
 	assert.Equal(t, http.StatusOK, ret.StatusCode)
 	assert.Equal(t, "{ \"error_code\": 0, \"error_msg\": \"ok\", \"data\": [{\"method\":\"GET\"}] }", string(ret.Body))
@@ -88,19 +74,6 @@ func TestClient_Get(t *testing.T) {
 }
 
 func TestClient_Post(t *testing.T) {
-	c, err := NewClient("test.post",
-		WithRetryCount(1),
-		WithTimeout("2s"),
-		WithMaxIdleConns(20000),
-		WithMaxIdleConnsPerHost(100),
-	)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	fmt.Printf("%+v\n", c)
-
 	requestBodyString := `{ "name": "heimdall" }`
 
 	dummyHandler := func(w http.ResponseWriter, r *http.Request) {
@@ -135,8 +108,13 @@ func TestClient_Post(t *testing.T) {
 	}
 
 	reply := Reply{}
-	ret := c.Post(context.Background(), server.URL, bytes.NewBuffer([]byte(requestBodyString)), headers, &reply)
-	require.NoError(t, err, "should not have failed to make a GET request")
+	ret := NewClient("test.post",
+		WithRetryCount(1),
+		WithTimeout(1*time.Second),
+		WithMaxIdleConns(20000),
+		WithMaxIdleConnsPerHost(100),
+	).Post(context.Background(), server.URL, bytes.NewBuffer([]byte(requestBodyString)), headers, &reply)
+	require.NoError(t, ret.Error, "should not have failed to make a GET request")
 
 	assert.Equal(t, http.StatusOK, ret.StatusCode)
 	assert.Equal(t, "{ \"error_code\": 0, \"error_msg\": \"ok\", \"data\": [{\"method\":\"POST\"}] }", string(ret.Body))

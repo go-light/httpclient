@@ -1,8 +1,9 @@
 package httpclient
 
 import (
-	heimdall "github.com/go-light/httpclient/heimdall"
 	"time"
+
+	heimdall "github.com/go-light/httpclient/heimdall"
 )
 
 // Option represents the client options
@@ -33,19 +34,5 @@ func WithRetrier(retrier heimdall.Retriable) Option {
 func WithHTTPClient(client heimdall.Doer) Option {
 	return func(c *Client) {
 		c.client = client
-	}
-}
-
-// WithMaxIdleConns sets controls the maximum number of idle (keep-alive)
-func WithMaxIdleConns(maxIdleConns int) Option {
-	return func(c *Client) {
-		c.maxIdleConns = maxIdleConns
-	}
-}
-
-// WithMaxIdleConnsPerHost sets controls the maximum idle
-func WithMaxIdleConnsPerHost(maxIdleConnsPerHost int) Option {
-	return func(c *Client) {
-		c.maxIdleConnsPerHost = maxIdleConnsPerHost
 	}
 }
