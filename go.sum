@@ -4,10 +4,10 @@ github.com/cactus/go-statsd-client/statsd v0.0.0-20200423205355-cb0885a1018c/go.
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/go-light/heimdall/v6 v6.1.0 h1:IVuHWzAhmeAIH4HPj2f/lhmYUdoSxBjDpI9lfCk2lKY=
+github.com/go-light/heimdall/v6 v6.1.0/go.mod h1:8g/ohsh0GXn8fzOf+qVrjX5pQLf7qQy8vEBjBUJ/9L4=
 github.com/go-light/logentry v0.0.0-20210316084942-6667eae57844 h1:dPnDJEWHIcdDLq3BnyOIDA3iikNE+bLcDaOlw2u3RZs=
 github.com/go-light/logentry v0.0.0-20210316084942-6667eae57844/go.mod h1:xmJVRD4Hf9jIO7F+etp12KgBLgOStqxqjm0Qn4IWNkM=
-github.com/gojektech/heimdall/v6 v6.1.0 h1:M9L1xryMKGWUlAA33D0r0BaKiXWzvuReltDPPkC5loM=
-github.com/gojektech/heimdall/v6 v6.1.0/go.mod h1:8g/ohsh0GXn8fzOf+qVrjX5pQLf7qQy8vEBjBUJ/9L4=
 github.com/gojektech/valkyrie v0.0.0-20180215180059-6aee720afcdf h1:WUa/Tvd+vZuW17gOND3CryHvG0yc2nhC1gr+H2F7bFM=
 github.com/gojektech/valkyrie v0.0.0-20180215180059-6aee720afcdf/go.mod h1:tDYRk1s5Pms6XJjj5m2PxAzmQvaDU8GqDf1u6x7yxKw=
 github.com/gopherjs/gopherjs v0.0.0-20181103185306-d547d1d9531e/go.mod h1:wJfORRmW1u3UXTncJ5qlYoELFm8eSnnEO6hX4iZ3EWY=
