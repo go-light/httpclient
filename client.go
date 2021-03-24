@@ -11,8 +11,8 @@ import (
 	"time"
 	"unsafe"
 
+	xhttpclient "github.com/go-light/httpclient/heimdall/httpclient"
 	"github.com/go-light/logentry"
-	xhttpclient "github.com/gojektech/heimdall/v6/httpclient"
 	"github.com/pkg/errors"
 )
 
