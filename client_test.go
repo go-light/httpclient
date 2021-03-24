@@ -9,7 +9,8 @@ import (
 
 func TestNewClient(t *testing.T) {
 	for i := 0; i < 100000; i++ {
-		c, err := NewClient("demo", WithRetryCount(1), WithTimeout("2s"))
+		c, err := NewClient("demo", WithRetryCount(1), WithTimeout("2s"),
+			WithMaxIdleConns(0), WithMaxIdleConnsPerHost(0))
 		if err != nil {
 			t.Error(err)
 			return

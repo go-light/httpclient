@@ -28,6 +28,9 @@ type Client struct {
 	xhttpclient *xhttpclient.Client
 	timeout     string
 	retryCount  int
+
+	maxIdleConns        int
+	maxIdleConnsPerHost int
 }
 
 type Resp struct {
@@ -63,7 +66,12 @@ func NewClient(name string, options ...Option) (HttpClient, error) {
 		return nil, err
 	}
 
-	client.xhttpclient = xhttpclient.NewClient(xhttpclient.WithHTTPTimeout(timeout), xhttpclient.WithRetryCount(client.retryCount))
+	client.xhttpclient = xhttpclient.NewClient(
+		xhttpclient.WithHTTPTimeout(timeout),
+		xhttpclient.WithRetryCount(client.retryCount),
+		xhttpclient.WithMaxIdleConns(client.maxIdleConns),
+		xhttpclient.WithMaxIdleConnsPerHost(client.maxIdleConnsPerHost),
+	)
 	httpClientMap.Store(name, client)
 
 	return client, nil
@@ -149,30 +157,4 @@ func (c *Client) do(ctx context.Context, url string, method string, headers http
 	}
 
 	return
-}
-
-// An Option configures a mutex.
-type Option interface {
-	Apply(*Client)
-}
-
-// OptionFunc is a function that configures a mutex.
-type OptionFunc func(*Client)
-
-// Apply calls f(mutex)
-func (f OptionFunc) Apply(mutex *Client) {
-	f(mutex)
-}
-
-func WithTimeout(timeout string) Option {
-	return OptionFunc(func(m *Client) {
-		m.timeout = timeout
-	})
-}
-
-// WithRetryCount can be used to
-func WithRetryCount(retryCount int) Option {
-	return OptionFunc(func(m *Client) {
-		m.retryCount = retryCount
-	})
 }
