@@ -10,9 +10,8 @@ http client
 
 ## Making a simple GET request
     
-headers := http.Header{}
+    headers := http.Header{}
 	headers.Set("Content-Type", "application/json")
-	headers.Set("Accept-Language", "en")
 
 	type Data struct {
 		Method string `json:"method"`
