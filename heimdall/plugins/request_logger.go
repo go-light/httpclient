@@ -3,7 +3,7 @@ package plugins
 import (
 	"context"
 	"fmt"
-	"github.com/go-light/httpclient/heimdall"
+	"github.com/go-light/httpclient/v2/heimdall"
 	"io"
 	"net/http"
 	"os"

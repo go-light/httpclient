@@ -3,7 +3,7 @@ package httpclient
 import (
 	"bytes"
 	"fmt"
-	"github.com/go-light/httpclient/heimdall"
+	"github.com/go-light/httpclient/v2/heimdall"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -486,8 +486,6 @@ func TestCustomHTTPClientHeaderSuccess(t *testing.T) {
 		WithHTTPTimeout(10*time.Millisecond),
 		WithHTTPClient(&myHTTPClient{
 			client: http.Client{Timeout: 25 * time.Millisecond}}),
-		WithMaxIdleConns(20001),
-		WithMaxIdleConnsPerHost(1024),
 	)
 
 	fmt.Println(*client)

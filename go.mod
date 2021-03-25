@@ -1,4 +1,4 @@
-module github.com/go-light/httpclient
+module github.com/go-light/httpclient/v2
 
 go 1.15
 

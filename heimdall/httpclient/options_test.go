@@ -2,7 +2,7 @@ package httpclient
 
 import (
 	"fmt"
-	"github.com/go-light/httpclient/heimdall"
+	"github.com/go-light/httpclient/v2/heimdall"
 	"net/http"
 	"testing"
 	"time"

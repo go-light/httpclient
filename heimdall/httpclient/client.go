@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/go-light/httpclient/heimdall"
+	"github.com/go-light/httpclient/v2/heimdall"
 	"github.com/gojektech/valkyrie"
 	"github.com/pkg/errors"
 )

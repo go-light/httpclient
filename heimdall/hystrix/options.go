@@ -1,11 +1,11 @@
 package hystrix
 
 import (
-	"github.com/go-light/httpclient/heimdall"
+	"github.com/go-light/httpclient/v2/heimdall"
 	"time"
 
 	"github.com/afex/hystrix-go/plugins"
-	"github.com/go-light/httpclient/heimdall/httpclient"
+	"github.com/go-light/httpclient/v2/heimdall/httpclient"
 )
 
 // Option represents the hystrix client options

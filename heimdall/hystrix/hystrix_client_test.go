@@ -2,7 +2,7 @@ package hystrix
 
 import (
 	"bytes"
-	"github.com/go-light/httpclient/heimdall"
+	"github.com/go-light/httpclient/v2/heimdall"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"

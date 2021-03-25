@@ -11,9 +11,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-light/httpclient/heimdall"
+	"github.com/go-light/httpclient/v2/heimdall"
 
-	xhttpclient "github.com/go-light/httpclient/heimdall/httpclient"
+	xhttpclient "github.com/go-light/httpclient/v2/heimdall/httpclient"
 	"github.com/go-light/logentry"
 	"github.com/pkg/errors"
 )
