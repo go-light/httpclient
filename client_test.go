@@ -16,13 +16,13 @@ import (
 
 func TestNewClient(t *testing.T) {
 	for i := 0; i < 100000; i++ {
-		c := NewClient("demo", WithRetryCount(1), WithTimeout(2*time.Second),
+		c := NewClient("demo", WithRetryCount(1), WithTimeout(Duration(2*time.Second)),
 			WithMaxIdleConns(0), WithMaxIdleConnsPerHost(0))
 
 		fmt.Println(c)
 
 		go func() {
-			c := NewClient("demo", WithRetryCount(1), WithTimeout(2*time.Second))
+			c := NewClient("demo", WithRetryCount(1), WithTimeout(Duration(2*time.Second)))
 			fmt.Println(c)
 		}()
 	}
@@ -58,7 +58,7 @@ func TestClient_Get(t *testing.T) {
 	reply := Reply{}
 	ret := NewClient("test.get",
 		WithRetryCount(1),
-		WithTimeout(2*time.Second),
+		WithTimeout(Duration(2*time.Second)),
 		WithMaxIdleConns(20000),
 		WithMaxIdleConnsPerHost(100),
 	).Get(context.Background(), server.URL, headers, &reply)
@@ -110,7 +110,7 @@ func TestClient_Post(t *testing.T) {
 	reply := Reply{}
 	ret := NewClient("test.post",
 		WithRetryCount(1),
-		WithTimeout(1*time.Second),
+		WithTimeout(Duration(1*time.Second)),
 		WithMaxIdleConns(20000),
 		WithMaxIdleConnsPerHost(100),
 	).Post(context.Background(), server.URL, bytes.NewBuffer([]byte(requestBodyString)), headers, &reply)
