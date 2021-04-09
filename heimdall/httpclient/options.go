@@ -3,7 +3,7 @@ package httpclient
 import (
 	"time"
 
-	heimdall "github.com/go-light/httpclient/v2/heimdall"
+	heimdall "github.com/go-light/httpclient/v3/heimdall"
 )
 
 // Option represents the client options

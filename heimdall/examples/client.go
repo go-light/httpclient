@@ -2,13 +2,13 @@ package examples
 
 import (
 	"fmt"
-	heimdall "github.com/go-light/httpclient/v2/heimdall"
+	heimdall "github.com/go-light/httpclient/v3/heimdall"
 	"io/ioutil"
 	"net/http"
 	"time"
 
-	"github.com/go-light/httpclient/v2/heimdall/httpclient"
-	"github.com/go-light/httpclient/v2/heimdall/hystrix"
+	"github.com/go-light/httpclient/v3/heimdall/httpclient"
+	"github.com/go-light/httpclient/v3/heimdall/hystrix"
 	"github.com/pkg/errors"
 )
 

@@ -3,7 +3,7 @@ package httpclient
 import (
 	"bytes"
 	"fmt"
-	"github.com/go-light/httpclient/v2/heimdall"
+	"github.com/go-light/httpclient/v3/heimdall"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"

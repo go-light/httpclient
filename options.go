@@ -15,9 +15,9 @@ func (f OptionFunc) Apply(client *Client) {
 	f(client)
 }
 
-func WithTimeout(timeout time.Duration) Option {
+func WithTimeout(timeout Duration) Option {
 	return OptionFunc(func(m *Client) {
-		m.timeout = timeout
+		m.timeout = time.Duration(timeout)
 	})
 }
 

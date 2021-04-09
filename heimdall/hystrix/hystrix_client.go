@@ -2,7 +2,7 @@ package hystrix
 
 import (
 	"bytes"
-	"github.com/go-light/httpclient/v2/heimdall"
+	"github.com/go-light/httpclient/v3/heimdall"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -11,7 +11,7 @@ import (
 	"github.com/afex/hystrix-go/hystrix"
 	metricCollector "github.com/afex/hystrix-go/hystrix/metric_collector"
 	"github.com/afex/hystrix-go/plugins"
-	"github.com/go-light/httpclient/v2/heimdall/httpclient"
+	"github.com/go-light/httpclient/v3/heimdall/httpclient"
 	"github.com/pkg/errors"
 )
 
