@@ -4,11 +4,19 @@ http client
 
 ## Install:
 
-	go get github.com/go-light/httpclient/v2
+	go get github.com/go-light/httpclient/v3
 
 # Usage
 
 ## Making a simple GET request
+
+    // httpClient 
+    httpClient := NewClientV3(
+    		WithRetryCount(1),
+    		WithTimeout(Duration(2*time.Second)),
+    		WithMaxIdleConns(20000),
+    		WithMaxIdleConnsPerHost(100),
+    	)
     
     headers := http.Header{}
 	headers.Set("Content-Type", "application/json")

@@ -8,12 +8,11 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
-	"sync"
 	"time"
 
-	"github.com/go-light/httpclient/v2/heimdall"
+	"github.com/go-light/httpclient/v3/heimdall"
 
-	xhttpclient "github.com/go-light/httpclient/v2/heimdall/httpclient"
+	xhttpclient "github.com/go-light/httpclient/v3/heimdall/httpclient"
 	"github.com/go-light/logentry"
 	"github.com/pkg/errors"
 )
@@ -24,11 +23,6 @@ const (
 
 	defaultMaxIdleConns        = 20000
 	defaultMaxIdleConnsPerHost = 1000
-)
-
-var (
-	httpClientMap sync.Map
-	mu            sync.Mutex
 )
 
 type myHTTPClient struct {
@@ -60,18 +54,7 @@ type Resp struct {
 	LogEntry   logentry.HttpClientLogEntry
 }
 
-func NewClient(name string, options ...Option) HttpClient {
-	if val, ok := httpClientMap.Load(name); ok {
-		return val.(*Client)
-	}
-
-	mu.Lock()
-	defer mu.Unlock()
-
-	if val, ok := httpClientMap.Load(name); ok {
-		return val.(*Client)
-	}
-
+func NewClientV3(options ...Option) HttpClient {
 	client := &Client{
 		timeout:    defaultHTTPTimeout,
 		retryCount: defaultRetryCount,
@@ -116,7 +99,6 @@ func NewClient(name string, options ...Option) HttpClient {
 		xhttpclient.WithRetryCount(client.retryCount),
 		xhttpclient.WithRetrier(heimdall.NewRetrier(heimdall.NewConstantBackoff(1*time.Millisecond, 5*time.Millisecond))),
 	)
-	httpClientMap.Store(name, client)
 
 	return client
 }
