@@ -139,6 +139,11 @@ func (c *Client) do(ctx context.Context, url string, method string, headers http
 
 	httpClient := c.xhttpclient
 
+	contentTypes := headers.Values("Content-Type")
+	if len(contentTypes) == 0 {
+		headers.Add("Content-Type", "application/json; charset=utf-8")
+	}
+
 	switch method {
 	case http.MethodGet:
 		// Use the clients GET method to create and execute the request
