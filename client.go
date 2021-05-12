@@ -143,8 +143,8 @@ func (c *Client) do(ctx context.Context, url string, method string, httpHeader h
 		httpHeader = http.Header{}
 	}
 
-	contentTypes := httpHeader.Values("Content-Type")
-	if len(contentTypes) == 0 {
+	contentTypes := httpHeader.Get("Content-Type")
+	if contentTypes == "" {
 		httpHeader.Add("Content-Type", "application/json; charset=utf-8")
 	}
 
