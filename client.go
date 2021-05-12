@@ -139,6 +139,10 @@ func (c *Client) do(ctx context.Context, url string, method string, headers http
 
 	httpClient := c.xhttpclient
 
+	if headers == nil {
+		headers = http.Header{}
+	}
+
 	contentTypes := headers.Values("Content-Type")
 	if len(contentTypes) == 0 {
 		headers.Add("Content-Type", "application/json; charset=utf-8")
