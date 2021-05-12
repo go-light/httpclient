@@ -103,15 +103,15 @@ func NewClientV3(options ...Option) HttpClient {
 	return client
 }
 
-func (c *Client) Get(ctx context.Context, url string, headers http.Header, res interface{}) (ret *Resp) {
-	return c.do(ctx, url, http.MethodGet, headers, nil, res)
+func (c *Client) Get(ctx context.Context, url string, httpHeader http.Header, res interface{}) (ret *Resp) {
+	return c.do(ctx, url, http.MethodGet, httpHeader, nil, res)
 }
 
-func (c *Client) Post(ctx context.Context, url string, body io.Reader, headers http.Header, res interface{}) (ret *Resp) {
-	return c.do(ctx, url, http.MethodPost, headers, body, res)
+func (c *Client) Post(ctx context.Context, url string, body io.Reader, httpHeader http.Header, res interface{}) (ret *Resp) {
+	return c.do(ctx, url, http.MethodPost, httpHeader, body, res)
 }
 
-func (c *Client) do(ctx context.Context, url string, method string, headers http.Header, body io.Reader, res interface{}) (ret *Resp) {
+func (c *Client) do(ctx context.Context, url string, method string, httpHeader http.Header, body io.Reader, res interface{}) (ret *Resp) {
 	var (
 		resp          *http.Response
 		err           error
@@ -139,22 +139,22 @@ func (c *Client) do(ctx context.Context, url string, method string, headers http
 
 	httpClient := c.xhttpclient
 
-	if headers == nil {
-		headers = http.Header{}
+	if httpHeader == nil {
+		httpHeader = http.Header{}
 	}
 
-	contentTypes := headers.Values("Content-Type")
+	contentTypes := httpHeader.Values("Content-Type")
 	if len(contentTypes) == 0 {
-		headers.Add("Content-Type", "application/json; charset=utf-8")
+		httpHeader.Add("Content-Type", "application/json; charset=utf-8")
 	}
 
 	switch method {
 	case http.MethodGet:
 		// Use the clients GET method to create and execute the request
-		resp, err = httpClient.Get(url, headers)
+		resp, err = httpClient.Get(url, httpHeader)
 	case http.MethodPost:
 		// Use the clients GET method to create and execute the request
-		resp, err = httpClient.Post(url, body, headers)
+		resp, err = httpClient.Post(url, body, httpHeader)
 	default:
 		err = fmt.Errorf("undefined method")
 		return
