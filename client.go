@@ -22,7 +22,7 @@ const (
 	defaultHTTPTimeout = 1 * time.Second
 
 	defaultMaxIdleConns        = 20000
-	defaultMaxIdleConnsPerHost = 1000
+	defaultMaxIdleConnsPerHost = 10
 )
 
 type myHTTPClient struct {
