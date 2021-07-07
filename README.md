@@ -4,15 +4,14 @@ http client
 
 ## Install:
 
-	go get github.com/go-light/httpclient/v3
+	go get github.com/go-light/httpclient/v4
 
 # Usage
 
 ## Making a simple GET request
 
     // httpClient 
-    httpClient := NewClientV3(
-    		WithRetryCount(1),
+    httpClient := NewClientV4(
     		WithTimeout(Duration(2*time.Second)),
     		WithMaxIdleConns(20000),
     		WithMaxIdleConnsPerHost(100),

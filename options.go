@@ -22,11 +22,11 @@ func WithTimeout(timeout Duration) Option {
 }
 
 // WithRetryCount can be used to
-func WithRetryCount(retryCount int) Option {
-	return OptionFunc(func(m *Client) {
-		m.retryCount = retryCount
-	})
-}
+//func WithRetryCount(retryCount int) Option {
+//	return OptionFunc(func(m *Client) {
+//		m.retryCount = retryCount
+//	})
+//}
 
 // WithMaxIdleConns sets controls the maximum number of idle (keep-alive)
 func WithMaxIdleConns(maxIdleConns int) Option {

@@ -10,28 +10,16 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/go-light/httpclient/v3/heimdall"
-
-	xhttpclient "github.com/go-light/httpclient/v3/heimdall/httpclient"
 	"github.com/go-light/logentry"
 	"github.com/pkg/errors"
 )
 
 const (
-	defaultRetryCount  = 1
 	defaultHTTPTimeout = 1 * time.Second
 
 	defaultMaxIdleConns        = 20000
 	defaultMaxIdleConnsPerHost = 10
 )
-
-type myHTTPClient struct {
-	client http.Client
-}
-
-func (c *myHTTPClient) Do(request *http.Request) (*http.Response, error) {
-	return c.client.Do(request)
-}
 
 type HttpClient interface {
 	Get(ctx context.Context, url string, headers http.Header, res interface{}) (ret *Resp)
@@ -39,9 +27,8 @@ type HttpClient interface {
 }
 
 type Client struct {
-	xhttpclient *xhttpclient.Client
+	xHttpClient *http.Client
 	timeout     time.Duration
-	retryCount  int
 
 	maxIdleConns        int
 	maxIdleConnsPerHost int
@@ -54,10 +41,9 @@ type Resp struct {
 	LogEntry   logentry.HttpClientLogEntry
 }
 
-func NewClientV3(options ...Option) HttpClient {
+func NewClientV4(options ...Option) HttpClient {
 	client := &Client{
-		timeout:    defaultHTTPTimeout,
-		retryCount: defaultRetryCount,
+		timeout: defaultHTTPTimeout,
 	}
 	for _, o := range options {
 		o.Apply(client)
@@ -87,18 +73,10 @@ func NewClientV3(options ...Option) HttpClient {
 		ExpectContinueTimeout: 1 * time.Second,
 	}
 
-	client.xhttpclient = xhttpclient.NewClient(
-		xhttpclient.WithHTTPTimeout(client.timeout),
-		xhttpclient.WithHTTPClient(&myHTTPClient{
-			// replace with custom HTTP client
-			client: http.Client{
-				Transport: rt,
-				Timeout:   client.timeout,
-			},
-		}),
-		xhttpclient.WithRetryCount(client.retryCount),
-		xhttpclient.WithRetrier(heimdall.NewRetrier(heimdall.NewConstantBackoff(1*time.Millisecond, 5*time.Millisecond))),
-	)
+	client.xHttpClient = &http.Client{
+		Transport: rt,
+		Timeout:   client.timeout,
+	}
 
 	return client
 }
@@ -129,6 +107,9 @@ func (c *Client) do(ctx context.Context, url string, method string, httpHeader h
 		logEntry.SetRespSizeBytes(respSizeBytes)
 		logEntry.End()
 		ret.LogEntry = logEntry
+		if resp != nil {
+			ret.StatusCode = resp.StatusCode
+		}
 	}()
 
 	ret = &Resp{
@@ -136,8 +117,6 @@ func (c *Client) do(ctx context.Context, url string, method string, httpHeader h
 		Body:       nil,
 		Error:      nil,
 	}
-
-	httpClient := c.xhttpclient
 
 	if httpHeader == nil {
 		httpHeader = http.Header{}
@@ -148,38 +127,31 @@ func (c *Client) do(ctx context.Context, url string, method string, httpHeader h
 		httpHeader.Add("Content-Type", "application/json; charset=utf-8")
 	}
 
-	switch method {
-	case http.MethodGet:
-		// Use the clients GET method to create and execute the request
-		resp, err = httpClient.Get(url, httpHeader)
-	case http.MethodPost:
-		// Use the clients GET method to create and execute the request
-		resp, err = httpClient.Post(url, body, httpHeader)
-	default:
-		err = fmt.Errorf("undefined method")
+	request, err := http.NewRequest(method, url, body)
+	if err != nil {
+		err = errors.Wrap(err, fmt.Sprintf("%s - request creation failed", method))
 		return
 	}
+	request.Header = httpHeader
 
+	resp, err = c.Do(request)
 	if err != nil {
 		ret.Error = err
 		return
 	}
-
-	statusCode = resp.StatusCode
-	ret.StatusCode = statusCode
-
 	defer resp.Body.Close()
+
+	if resp.StatusCode >= http.StatusBadRequest {
+		ret.Error = errors.New(resp.Status)
+		return
+	}
+
 	respBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		ret.Error = err
 		return
 	}
-
 	ret.Body = respBody
-	if statusCode >= http.StatusBadRequest {
-		ret.Error = errors.New(resp.Status)
-		return
-	}
 
 	respSizeBytes = fmt.Sprintf("%d", len(respBody))
 
@@ -192,4 +164,9 @@ func (c *Client) do(ctx context.Context, url string, method string, httpHeader h
 	}
 
 	return
+}
+
+// Do makes an HTTP request with the native `http.Do` interface
+func (c *Client) Do(request *http.Request) (*http.Response, error) {
+	return c.xHttpClient.Do(request)
 }

@@ -16,21 +16,20 @@ import (
 
 func TestNewClient(t *testing.T) {
 	for i := 0; i < 100000; i++ {
-		c := NewClientV3(WithRetryCount(1), WithTimeout(Duration(2*time.Second)),
+		c := NewClientV4(WithTimeout(Duration(2*time.Second)),
 			WithMaxIdleConns(0), WithMaxIdleConnsPerHost(0))
 
 		fmt.Println(c)
 
 		go func() {
-			c := NewClientV3(WithRetryCount(1), WithTimeout(Duration(2*time.Second)))
+			c := NewClientV4(WithTimeout(Duration(2 * time.Second)))
 			fmt.Println(c)
 		}()
 	}
 }
 
 func TestClient_Get(t *testing.T) {
-	httpClient := NewClientV3(
-		WithRetryCount(1),
+	httpClient := NewClientV4(
 		WithTimeout(Duration(1*time.Second)),
 		WithMaxIdleConns(20000),
 		WithMaxIdleConnsPerHost(100),
@@ -76,8 +75,7 @@ func TestClient_Get(t *testing.T) {
 }
 
 func TestClient_Post(t *testing.T) {
-	httpClient := NewClientV3(
-		WithRetryCount(1),
+	httpClient := NewClientV4(
 		WithTimeout(Duration(2*time.Second)),
 		WithMaxIdleConns(20000),
 		WithMaxIdleConnsPerHost(100),
